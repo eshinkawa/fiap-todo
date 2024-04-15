@@ -1,34 +1,74 @@
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { ScreenContent } from 'components/ScreenContent';
-import { StyleSheet, View } from 'react-native';
+import { AntDesign } from '@expo/vector-icons'; // Importando o ícone de seta
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 
-import { Button } from '../components/Button';
-import { RootStackParamList } from '../navigation';
+const Overview = ({ navigation }) => {
+  const [todos, setTodos] = useState([]);
 
-type OverviewScreenNavigationProps = StackNavigationProp<RootStackParamList, 'Overview'>;
+  useEffect(() => {
+    const fetchTodos = async () => {
+      const response = await fetch('https://run.mocky.io/v3/9e5d4c35-c66a-40a9-af17-8c00fc91ffe3');
+      const data = await response.json();
+      setTodos(data);
+    };
 
-export default function Overview() {
-  const navigation = useNavigation<OverviewScreenNavigationProps>();
+    fetchTodos();
+  }, []);
 
   return (
-    <View style={styles.container}>
-      <ScreenContent path="screens/overview.tsx" title="Overview" />
-      <Button
-        onPress={() =>
-          navigation.navigate('Details', {
-            name: 'Dan',
-          })
-        }
-        title="Show Details"
-      />
-    </View>
+    <FlatList
+      data={todos}
+      renderItem={({ item }) => (
+        <TouchableOpacity
+          style={styles.item}
+          onPress={() => navigation.navigate('Details', { todo: item })}>
+          <Text>{item.title}</Text>
+          <AntDesign name="right" size={12} color="black" />
+        </TouchableOpacity>
+      )}
+      keyExtractor={(item) => item.id.toString()}
+    />
   );
-}
+};
 
-export const styles = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
+    backgroundColor: '#E5E5E5',
+  },
+  list: {
+    marginTop: 20,
+  },
+  item: {
+    backgroundColor: '#FFFFFF',
+    padding: 20,
+    marginVertical: 8,
+    marginHorizontal: 16,
+    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    elevation: 3,
+  },
+  title: {
+    fontSize: 18,
+  },
+  itemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  },
+  square: {
+    width: 24,
+    height: 24,
+    backgroundColor: '#55BCF6',
+    opacity: 0.4,
+    borderRadius: 5,
+    marginRight: 15,
+  },
+  itemText: {
+    maxWidth: '80%',
   },
 });
+
+export default Overview;
